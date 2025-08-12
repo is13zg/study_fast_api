@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, EmailStr
 
 
 class User(BaseModel):
@@ -11,9 +11,22 @@ class CreateUser(BaseModel):
     age: int
 
 
+class UserContact(BaseModel):
+    email: EmailStr = Field(...)
+    phone: str = Field(min_length=7, max_length=15)
+
+    @field_validator('phone')
+    def check_phone(cls, phone: str):
+        if all(x.isdigit() for x in phone):
+            return phone
+        else:
+            raise ValueError('Некоректный номер')
+
+
 class Feedback(BaseModel):
     name: str = Field(..., min_length=2, max_length=10)
     message: str = Field(..., min_length=10, max_length=500)
+    contacts: UserContact
 
     @field_validator('message')
     def check_message(cls, value: str):

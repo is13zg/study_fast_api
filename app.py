@@ -20,10 +20,10 @@ fake_feedbacks = [{
 
 
 @app.post("/feedback")
-async def put_feeedback(fd: Feedback):
+async def put_feeedback( fd: Feedback, is_premium: bool = False):
     fake_feedbacks.append(fd)
     return {
-        "message": f"Feedback received. Thank you, {fd.name}."
+        "message": f"Feedback received. Thank you, {fd.name}. {"Ваш отзыв будет рассмотрен в приоритетном порядке." if is_premium else ""}"
     }
 
 
