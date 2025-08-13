@@ -9,6 +9,12 @@ class Product(BaseModel):
     price: float
 
 
+class MessageResponse(BaseModel):
+    message: str
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
 
 class UserCreate(BaseModel):
     name: str

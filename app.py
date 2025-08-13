@@ -3,9 +3,11 @@ from fastapi.responses import HTMLResponse
 import uvicorn
 from models import User, CreateUser, Feedback, UserCreate
 from  product_router import product_router
+from login import login_router
 
 app = FastAPI()
 app.include_router(product_router)
+app.include_router(login_router)
 
 # Пример пользовательских данных (для демонстрационных целей)
 fake_users = {
@@ -19,6 +21,8 @@ fake_feedbacks = [{
     "name": "Alice",
     "message": "Отличный курс, я многое узнаю, а также закрепляю знания на практике!"
 }]
+
+
 
 
 @app.post("/feedback")
@@ -62,6 +66,13 @@ async def add_user(user: CreateUser):
 async def create_user(user: UserCreate):
     return user
 
+@app.post("/create6")
+async def create_user(user: UserCreate):
+    return user
+
+
+
+
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", reload=True)
+    uvicorn.run("app:app", reload=True, reload_includes=["*.py",])
