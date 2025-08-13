@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 import uvicorn
-from models import User, CreateUser, Feedback
+from models import User, CreateUser, Feedback, UserCreate
+from  product_router import product_router
 
 app = FastAPI()
+app.include_router(product_router)
 
 # Пример пользовательских данных (для демонстрационных целей)
 fake_users = {
@@ -55,6 +57,10 @@ async def get_user():
 @app.post("/add_users")
 async def add_user(user: CreateUser):
     return {"age": user.age, "name": user.name, "is_adult": user.age >= 18}
+
+@app.post("/create_user")
+async def create_user(user: UserCreate):
+    return user
 
 
 if __name__ == "__main__":

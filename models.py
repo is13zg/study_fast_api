@@ -1,4 +1,20 @@
 from pydantic import BaseModel, Field, field_validator, EmailStr
+from typing import Optional
+
+
+class Product(BaseModel):
+    product_id: int
+    name: str
+    category: str
+    price: float
+
+
+
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    age: Optional[int] = Field(default=None, gt=0, lt=130)
+    is_subscribed: Optional[bool]
 
 
 class User(BaseModel):
