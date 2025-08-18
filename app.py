@@ -4,10 +4,12 @@ import uvicorn
 from models import User, CreateUser, Feedback, UserCreate
 from  product_router import product_router
 from login import login_router
+from login2 import login_router2
 
 app = FastAPI()
 app.include_router(product_router)
 app.include_router(login_router)
+app.include_router(login_router2)
 
 # Пример пользовательских данных (для демонстрационных целей)
 fake_users = {
