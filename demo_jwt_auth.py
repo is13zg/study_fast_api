@@ -39,7 +39,7 @@ def auth_user(credentials: OAuth2PasswordRequestForm = Depends()):
     user = get_user_from_db(credentials.username)
 
     if user is None or not pwd_context.verify(
-        credentials.password, user.hashed_password
+            credentials.password, user.hashed_password
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -51,7 +51,7 @@ def auth_user(credentials: OAuth2PasswordRequestForm = Depends()):
 
 def create_jwt_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.datetime.now() + datetime.timedelta(
+    expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES
     )
     to_encode.update({"exp": expire})
@@ -61,17 +61,15 @@ def create_jwt_token(data: dict):
 
 def get_user_from_token(token: str = Depends(oauth2_scheme)):
     try:
-        print(token)
-        payload = jwt.decode(token, main_secret, algorithm="HS256")
-        print(payload)
+        payload = jwt.decode(token, main_secret, algorithms=["HS256"])
         return payload.get("username")
-    except jwt.ExpiredSignatureError:
+    except jwt.ExpiredSignatureError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token's time is up",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e2:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token 2",
@@ -82,7 +80,7 @@ def get_user_from_token(token: str = Depends(oauth2_scheme)):
 @jwt_router.post("/login")
 def login(user: User = Depends(auth_user)):
     # генерация jwt  c временем хранения
-    token = create_jwt_token(user.model_dump())
+    token = create_jwt_token({"username": user.username})
     return {"access_token": token, "token_type": "bearer"}
 
 
