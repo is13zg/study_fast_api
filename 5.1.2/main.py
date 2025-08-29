@@ -24,7 +24,7 @@ async def create_item(item: Todo, db: asyncpg.Connection = Depends(get_db_connec
 
 
 async def get_task_by_id(
-    id: int, db: asyncpg.Connection = Depends(get_db_connection)
+        id: int, db: asyncpg.Connection
 ) -> Todo | None:
     return await db.fetchrow(
         """
@@ -37,8 +37,8 @@ async def get_task_by_id(
 
 
 @app.get("/task/{id}")
-async def get_task(id: int):
-    task = await get_task_by_id(id)
+async def get_task(id: int,  db: asyncpg.Connection = Depends(get_db_connection)):
+    task = await get_task_by_id(id,db)
 
     if not task:
         raise HTTPException(
@@ -50,20 +50,23 @@ async def get_task(id: int):
 
 
 @app.put("/upd_task")
-async def get_task(item: Todo, db: asyncpg.Connection = Depends(get_db_connection)):
-    task = await get_task_by_id(item.id)
+async def upd_task(item: Todo, db: asyncpg.Connection = Depends(get_db_connection)):
+    task = await get_task_by_id(item.id, db)
 
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Task with id = {id} not found.",
+            detail=f"Task with id = {item.id} not found.",
         )
     update_task = await db.fetchrow(
         """
-        INSERT INTO tasks (id, title, description, completed)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *;
-    """,
+        UPDATE tasks
+        SET title = $2,
+            description = $3,
+            completed = $4
+        WHERE id = $1
+        RETURNING *
+        """,
         item.id,
         item.title,
         item.description,
@@ -74,7 +77,7 @@ async def get_task(item: Todo, db: asyncpg.Connection = Depends(get_db_connectio
 
 
 @app.delete("/del_task/{id}")
-async def del_task(id: int, db: asyncpg.Connection = Depends(get_db_connection())):
+async def del_task(id: int, db: asyncpg.Connection = Depends(get_db_connection)):
     deleted_count = await db.execute("DELETE FROM tasks WHERE id = $1", id)
 
     if deleted_count == "DELETE 0":
